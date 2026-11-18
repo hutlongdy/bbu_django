@@ -1,0 +1,68 @@
+{% extends "my_app/base.html" %}
+{% load static %}
+{% block title %}{{ title }} | School management{% endblock %}
+{% block content %}
+    <h2>{{ title }}</h2>
+    {% if record_kind == "attendance" %}
+        <section class="panel attendance-scanner"
+                 data-attendance-scanner
+                 data-endpoint="{% url 'attendance-scan' %}">
+            <h3>Scan student check-in or check-out</h3>
+            <p>Select the action, then scan the student's QR code with the camera.</p>
+            <div class="attendance-scan-actions" role="group" aria-label="Scan action">
+                <button class="button button-primary" type="button" data-scan-action="check_in" aria-pressed="true">Check in</button>
+                <button class="button button-secondary" type="button" data-scan-action="check_out" aria-pressed="false">Check out</button>
+                <button class="button button-secondary" type="button" data-camera-start>Start camera</button>
+                <button class="button button-secondary" type="button" data-camera-stop hidden>Stop camera</button>
+            </div>
+            <video class="attendance-camera" data-camera-preview playsinline muted hidden></video>
+            <p class="scan-status" data-scan-status role="status" aria-live="polite">Choose a scan action and start the camera.</p>
+            <form class="scan-csrf" aria-hidden="true">{% csrf_token %}</form>
+            {% if can_manage_students %}<p>Need student QR cards? Open <a href="{% url 'student-list' %}">Students</a> and print the active-student list.</p>{% endif %}
+        </section>
+        <script src="{% static 'my_app/jsqr-1.4.0.js' %}" defer></script>
+        <script src="{% static 'my_app/attendance-scanner.js' %}" defer></script>
+    {% endif %}
+    <section class="panel" style="margin-bottom: 1rem;">
+        <h3>Record {{ title|lower }}</h3>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="button" type="submit">Save record</button>
+        </form>
+    </section>
+    <div class="table-wrap">
+        <table>
+            {% if record_kind == "attendance" %}
+                <thead><tr><th>Date</th><th>Student</th><th>Class</th><th>Status</th><th>Check-in</th><th>Check-out</th><th>Note</th></tr></thead>
+                <tbody>
+                    {% for record in records %}
+                        <tr>
+                            <td>{{ record.date }}</td>
+                            <td>{{ record.enrollment.student }}</td>
+                            <td>{{ record.enrollment.school_class.name }}</td>
+                            <td>{{ record.get_status_display }}</td>
+                            <td>{{ record.checked_in_at|date:"H:i"|default:"—" }}</td>
+                            <td>{{ record.checked_out_at|date:"H:i"|default:"—" }}</td>
+                            <td>{{ record.note }}</td>
+                        </tr>
+                    {% empty %}<tr><td colspan="7">No attendance records yet.</td></tr>{% endfor %}
+                </tbody>
+            {% else %}
+                <thead><tr><th>Date</th><th>Student</th><th>Class</th><th>Subject</th><th>Assessment</th><th>Score</th></tr></thead>
+                <tbody>
+                    {% for record in records %}
+                        <tr>
+                            <td>{{ record.assessed_on }}</td>
+                            <td>{{ record.enrollment.student }}</td>
+                            <td>{{ record.enrollment.school_class.name }}</td>
+                            <td>{{ record.class_subject.subject.name }}</td>
+                            <td>{{ record.assessment }}</td>
+                            <td>{{ record.score }} / {{ record.maximum_score }}</td>
+                        </tr>
+                    {% empty %}<tr><td colspan="6">No grades recorded yet.</td></tr>{% endfor %}
+                </tbody>
+            {% endif %}
+        </table>
+    </div>
+{% endblock %}
