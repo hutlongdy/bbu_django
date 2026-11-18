@@ -137,6 +137,20 @@ python manage.py test --settings=my_project.test_settings
 
 ## Deployment
 
-Set `DJANGO_SECRET_KEY` to a unique secret, set `DJANGO_DEBUG` to `false`, and
-configure `DJANGO_ALLOWED_HOSTS` as a comma-separated list before deployment.
-Use HTTPS and secure PostgreSQL credentials in production.
+This project is deployed from the `main` branch of GitHub repository
+`hutlongdy/bbu_django`. Vercel detects Django from `manage.py`, serves
+collected static files from the CDN using `STATIC_ROOT`, and redeploys when
+changes are pushed to `main`.
+
+In the Vercel project's **Settings > Environment Variables**, configure:
+
+- `DJANGO_SECRET_KEY` as a newly generated, private secret.
+- `DJANGO_DEBUG` as `false`.
+- `DJANGO_ALLOWED_HOSTS` as `bbu-django.vercel.app` plus any custom domains,
+  comma-separated.
+- `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST`, and
+  `POSTGRES_PORT` with credentials for managed PostgreSQL. Never commit these
+  values or use a local database in production.
+
+Run database migrations against the production database after schema changes.
+Use HTTPS and ensure the database provider allows connections from Vercel.

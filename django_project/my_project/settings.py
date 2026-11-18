@@ -14,6 +14,8 @@ ALLOWED_HOSTS = [
     for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
     if host.strip()
 ]
+if "bbu-django.vercel.app" not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append("bbu-django.vercel.app")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -88,6 +90,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/"

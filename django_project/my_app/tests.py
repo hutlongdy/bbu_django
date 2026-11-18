@@ -96,6 +96,11 @@ class SchoolRecordTests(TestCase):
             response, "/accounts/login/?next=/", fetch_redirect_response=False
         )
 
+    def test_vercel_host_is_allowed(self):
+        response = self.client.get("/", HTTP_HOST="bbu-django.vercel.app")
+
+        self.assertEqual(response.status_code, 302)
+
     def test_admin_login_page_is_available_to_anonymous_users(self):
         response = self.client.get("/admin/login/")
 
